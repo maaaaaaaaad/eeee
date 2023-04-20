@@ -1,47 +1,35 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"math"
+)
 
 func main() {
-	girlCount := 3
-	boyCount := 5
+	r := 5.0
+	h := 10.0
+	n := 1000
 
-	girlPermutation := factorial(girlCount)
+	l := math.Sqrt(r*r + h*h)
 
-	boyCombination := combination(boyCount, girlCount-1)
-
-	result := girlPermutation * boyCombination
-
-	fmt.Printf("여자 3명이 누구도 이웃하지 않는 경우의 수는 %d입니다.\n", result)
-}
-
-func factorial(n int) int {
-	if n == 0 {
-		return 1
-	}
-	return n * factorial(n-1)
-}
-
-func combination(n int, r int) int {
-	if r == 0 || r == n {
-		return 1
+	f := func(x float64) float64 {
+		rx := (r * (h - x)) / h
+		ax := math.Pi * rx * rx
+		vx := (1.0 / 3.0) * ax * (h - x)
+		return vx
 	}
 
-	if n <= 5 && r <= 3 {
-		switch {
-		case n == 5 && r == 1:
-			return 5
-		case n == 5 && r == 2:
-			return 10
-		case n == 5 && r == 3:
-			return 10
-		}
+	a := 0.0
+	b := h
+	dx := (b - a) / float64(n)
+	sum := (f(a) + f(b)) / 2.0
+	for i := 1; i < n; i++ {
+		x := a + float64(i)*dx
+		sum += f(x)
 	}
+	integral := dx * sum
 
-	result := 1
-	for i := 1; i <= r; i++ {
-		result *= n - i + 1
-		result /= i
-	}
-	return result
+	volume := integral * l / 3.0
+
+	fmt.Printf("The volume of the cone is %.2f\n", volume)
 }
