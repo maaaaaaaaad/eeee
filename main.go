@@ -2,30 +2,16 @@ package main
 
 import (
 	"fmt"
-	"math"
 )
 
 func main() {
-	r := 5.0
-	n := 1000
-	a := 0.0
-	b := 2.0 * math.Pi * r
-	dx := (b - a) / float64(n)
+	a := []float64{1.0, 2.0, 3.0}
+	b := []float64{4.0, 5.0, 6.0}
 
-	f := func(x float64) float64 {
-		ax := math.Pi * (r*r - x*x)
-		return ax
+	dotProduct := 0.0
+	for i := 0; i < len(a); i++ {
+		dotProduct += a[i] * b[i]
 	}
 
-	sum := (f(a) + f(b)) / 2.0
-	for i := 1; i < n; i++ {
-		x := a + float64(i)*dx
-		sum += f(x)
-	}
-	integral := dx * sum
-
-	volume := 4.0 / 3.0 * math.Pi * math.Pow(r, 3.0)
-	volume = volume * integral / (math.Pi * math.Pow(r, 2.0))
-
-	fmt.Printf(" %.2f\n", volume)
+	fmt.Printf("두 벡터의 내적 %.2f", dotProduct)
 }
