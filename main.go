@@ -1,79 +1,80 @@
-package main
-
 import (
-	"fmt"
+	"sort"
 )
 
-type Node struct {
-	value    int
-	children []*Node
-	parent   *Node
+type aa struct {
+	a, b, idx int
 }
 
-func newNode(value int) *Node {
-	return &Node{
-		value:    value,
-		children: make([]*Node, 0),
+func cmp(a, b aa) bool {
+	return a.a > b.a
+}
+
+func cmp2(a, b pair) bool {
+	if a.first == b.first {
+		return b.second < a.second
+	}
+	return a.first > b.first
+}
+
+type pair struct {
+	first, second int
+}
+
+var v []aa
+
+func initialize(scores [][]int) {
+	for i := 0; i < len(scores); i++ {
+		v = append(v, aa{scores[i][0], scores[i][1], i})
 	}
 }
 
-func (n *Node) querySum() int {
-	sum := n.value
-	for _, child := range n.children {
-		sum += child.querySum()
-	}
-	return sum
-}
-
-func (n *Node) updateValues(w int) {
-	for n.parent != nil {
-		n.value = n.parent.value
-		n = n.parent
-	}
-	n.value = w
-}
-
-func buildTree(values []int, edges [][]int) *Node {
-	nodes := make([]*Node, len(values)+1)
-	for i, value := range values {
-		nodes[i+1] = newNode(value)
-	}
-
-	for _, edge := range edges {
-		u, v := edge[0], edge[1]
-		nodes[u].children = append(nodes[u].children, nodes[v])
-		nodes[v].parent = nodes[u]
-	}
-
-	return nodes[1]
-}
-
-func solution(values []int, edges [][]int, queries [][]int) []int {
-	tree := buildTree(values, edges)
-	result := make([]int, 0)
-
-	for _, query := range queries {
-		u, w := query[0], query[1]
-
-		if w == -1 {
-			result = append(result, tree.children[u-2].querySum())
-		} else {
-			if u == 1 {
-				tree.updateValues(w)
-			} else {
-				tree.children[u-2].updateValues(w)
+func solution(scores [][]int) int {
+	initialize(scores)
+	sort.Slice(v, func(i, j int) bool {
+		return cmp(v[i], v[j])
+	})
+	var ans []pair
+	for i := 0; i < len(v); i++ {
+		flag := true
+		r := v[i]
+		for t := 0; t < i; t++ {
+			l := v[t]
+			if l.a > r.a && l.b > r.b {
+				flag = false
+				break
 			}
 		}
+		if !flag {
+			continue
+		}
+		ans = append(ans, pair{r.a + r.b, r.idx})
 	}
-
-	return result
-}
-
-func main() {
-	values := []int{1, 10, 100, 1000, 10000}
-	edges := [][]int{{1, 2}, {1, 3}, {2, 4}, {2, 5}}
-	queries := [][]int{{1, -1}, {2, -1}, {3, -1}, {4, -1}, {5, -1}, {4, 1000}, {1, -1}, {2, -1}, {3, -1}, {4, -1}, {5, -1}, {2, 1}, {1, -1}, {2, -1}, {3, -1}, {4, -1}, {5, -1}}
-
-	result := solution(values, edges, queries)
-	fmt.Println(result)
+	sort.Slice(ans, func(i, j int) bool {
+		return cmp2(ans[i], ans[j])
+	})
+	answer := 0
+	rank := 1
+	for i := 0; i < len(ans); i++ {
+		a := ans[i].first
+		cnt := 0
+		for i < len(ans) && a == ans[i].first {
+			if ans[i].second == 0 {
+				answer = rank
+				rank++
+				break
+			}
+			i++
+			cnt++
+		}
+		rank += cnt
+		i--
+		if answer != 0 {
+			break
+		}
+	}
+	if answer == 0 {
+		return -1
+	}
+	return answer
 }
